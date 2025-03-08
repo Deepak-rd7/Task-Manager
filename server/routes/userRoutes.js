@@ -10,3 +10,4 @@ router.post('/login',login);
 router.get('/userdata',authProtect,getUserdata);
 router.post('/logout',logout);
 export default router;
+

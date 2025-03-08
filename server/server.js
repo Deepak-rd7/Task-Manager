@@ -9,7 +9,7 @@ import userRoute from "./routes/userRoutes.js"
 const app=express();
 
 dbconnect();
-const port=process.env.PORT ;
+const port=process.env.PORT;
 
 
 app.use(express.json());

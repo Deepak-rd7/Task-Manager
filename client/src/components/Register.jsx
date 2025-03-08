@@ -1,76 +1,86 @@
 import React, { useContext, useState } from "react";
 import { userContext } from "../context/UserContext";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import {toast} from "react-fox-toast";
+import { toast } from "react-fox-toast";
+import validator from "validator";
 
 export default function Register() {
   const [state, setState] = useState("Sign Up");
 
-  const [name,setName]=useState('');
-  const [email,setEmail]=useState('');
-  const [password,setPassword]=useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const {setLoggedIn}=useContext( userContext );
+  const { setLoggedIn } = useContext(userContext);
 
-  const navigate=useNavigate();
-  
+  const navigate = useNavigate();
+
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if(state==='Sign Up'){
-      try {
-        const {data}=await axios.post("http://localhost:3000/users/register",{name,email,password})
+    if (
+      !validator.isEmail(email)
+    
+    ) {
 
-        // console.log(data);
-
-        if(data.success){
-          toast.success(data.message,{
-            position: 'top-center'
-          });
-          navigate('/dashboard');
-          setLoggedIn(true);
-        }
-        else{
-          toast.error(data.message);
-        }
-
-        
-       
-
-      } catch (error) {
-        console.log(error.message);
-        
-      }
-    }else{
-      try {
-        const {data}=await axios.post("http://localhost:3000/users/login",{email,password})
-
-        
-
-        if(data.success){
-          toast.success(data.message,{
-            position: 'top-center'
-          });
-          setLoggedIn(true);
-          navigate('/dashboard');
-          
-        }else{
-        toast.error(data.message,{
-           position: 'top-center'
-        });
-        }
-        
-        
-        
-      } catch (error) {
-        console.log(error.message);
-        
-      }
+      toast.error('Enter valid Email',{
+        position:'top-center'
+      })
+      return;
+ 
+    } else if(!validator.isStrongPassword(password)) {
+      toast.warning("Enter valid Password",{
+        position:'top-center',
+      });
+      return;
     }
 
- 
-  }
+      if (state === "Sign Up") {
+        try {
+          const { data } = await axios.post(
+            "http://localhost:3000/users/register",
+            { name, email, password }
+          );
+
+          // console.log(data);
+
+          if (data.success) {
+            toast.success(data.message, {
+              position: "top-center",
+            });
+            navigate("/dashboard");
+            setLoggedIn(true);
+          } else {
+            toast.error(data.message);
+          }
+        } catch (error) {
+          console.log(error.message);
+        }
+      } else {
+        try {
+          const { data } = await axios.post(
+            "http://localhost:3000/users/login",
+            { email, password }
+          );
+
+          if (data.success) {
+            toast.success(data.message, {
+              position: "top-center",
+            });
+            setLoggedIn(true);
+            navigate("/dashboard");
+          } else {
+            toast.error(data.message, {
+              position: "top-center",
+            });
+          }
+        } catch (error) {
+          console.log(error.message);
+        }
+      }
+    }
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
@@ -96,7 +106,7 @@ export default function Register() {
           </>
         )}
 
-        <form className="mt-6" onSubmit={handleSubmit} >
+        <form className="mt-6" onSubmit={handleSubmit}>
           {state === "Sign Up" && (
             <div className="mb-4">
               <label className="block text-gray-700">Full Name</label>
@@ -104,7 +114,8 @@ export default function Register() {
                 type="text"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your full name"
-                onChange={(e)=>setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
+                required
               />
             </div>
           )}
@@ -115,7 +126,8 @@ export default function Register() {
               type="email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
-              onChange={(e)=>setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -125,8 +137,17 @@ export default function Register() {
               type="password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your password"
-              onChange={(e)=>setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
+            {state === "Sign Up" && (
+              <ul className="space-y-1 text-xs text-gray-600 mt-2 pl-4 w-full border-2 py-2  rounded-lg list-disc">
+                <li>At least 8 characters long</li>
+                <li>Includes uppercase and lowercase letters</li>
+                <li>Contains numbers (0-9)</li>
+                <li>Has special symbols (!@#$%^&*)</li>
+              </ul>
+            )}
           </div>
 
           {state === "Sign Up" ? (
